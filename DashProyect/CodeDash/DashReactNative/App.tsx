@@ -11,6 +11,7 @@ import LibraryScreen from './screens/LibraryScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import GameDetailsScreen from './screens/GameDetailScreen';
 import LoginScreen from './screens/LoginScreen';
+import PresentationScreen from './screens/PresentationScreen';
 
 const Tab = createBottomTabNavigator<TabParamList>();
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -59,7 +60,7 @@ const TabNavigator: React.FC = () => {
 const App: React.FC = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
+      <Stack.Navigator initialRouteName="Presentation">
         <Stack.Screen 
           name="Login" 
           component={LoginScreen}
@@ -74,6 +75,11 @@ const App: React.FC = () => {
           name="GameDetails" 
           component={GameDetailsScreen}
           options={{ title: 'Detalles del juego' }}
+        />
+        <Stack.Screen 
+          name="Presentation" 
+          component={PresentationScreen}
+          options={{ headerShown: false }}
         />
       </Stack.Navigator>
     </NavigationContainer>

@@ -33,13 +33,13 @@ const StoreScreen: React.FC<Props> = ({ navigation }) => {
       <FlatList
         data={filteredGames}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
+        renderItem={({ item }) => ( 
           <TouchableOpacity
             style={styles.gameItem}
             onPress={() => navigation.navigate('GameDetails', { gameId: item.id })}
           >
             <Image source={{ uri: item.imageUrl }} style={styles.gameImage} />
-            <View style={styles.gameInfo}>
+              <View style={styles.gameInfo}>
               <Text style={styles.gameTitle}>{item.title}</Text>
               <Text style={styles.gamePrice}>${item.price.toFixed(2)}</Text>
             </View>

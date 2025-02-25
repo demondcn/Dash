@@ -2,6 +2,7 @@ export type RootStackParamList = {
   Login: undefined;
   MainTabs: undefined;
   GameDetails: { gameId: string };
+  Presentation: undefined;
 };
 
 export type TabParamList = {
@@ -9,3 +10,4 @@ export type TabParamList = {
   Biblioteca: undefined;
   Perfil: undefined;
 };
+
