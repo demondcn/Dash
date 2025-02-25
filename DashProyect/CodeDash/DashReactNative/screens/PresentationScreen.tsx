@@ -1,39 +1,40 @@
 import React from 'react';
-import { View, Image, StyleSheet, Button, Text, ImageBackground } from 'react-native';
+import { View, Image, ImageBackground, StyleSheet, Button, Text } from 'react-native';
 import { StackScreenProps } from '@react-navigation/stack';
+import { LinearGradient } from 'expo-linear-gradient'; 
 import { RootStackParamList } from '../types/navigation';
 
 type Props = StackScreenProps<RootStackParamList, 'Presentation'>;
 
-const backgroundImageUri = 'https://i0.wp.com/www.marcelopedra.com.ar/blog/wp-content/uploads/2013/10/animated-gifs-of-fighting-game-backgrounds-7.gif?resize=624%2C396&ssl=1'; // Cambia esta URL por la de tu imagen
+const backgroundImageUri = 'https://i0.wp.com/www.marcelopedra.com.ar/blog/wp-content/uploads/2013/10/animated-gifs-of-fighting-game-backgrounds-7.gif?resize=624%2C396&ssl=1';
 
 const PresentationScreen: React.FC<Props> = ({ navigation }) => {
   return (
-    <ImageBackground source={{ uri: backgroundImageUri }} style={styles.container} resizeMode="cover">
-      <View style={styles.imageContainer}>
-        <Image 
-          source={{ uri: 'https://i.pinimg.com/736x/2f/6b/2b/2f6b2b1b133b0ffce51b861e51e759ff.jpg' }} 
-          style={styles.image}
-          resizeMode="cover"
+    <View style={styles.container}>
+      <ImageBackground source={{ uri: backgroundImageUri }} style={styles.image} resizeMode="cover">
+        <LinearGradient
+          colors={['transparent', 'rgba(0,0,0,0.8)']}
+          start={{ x: 0.5, y: 0 }} 
+          end={{ x: 0, y: 0 }} 
+          style={styles.gradient}
         />
-      </View>
 
-      {/* Barra separadora */}
-      <View style={styles.separator} />
+        {/* Icono arriba a la izquierda sin afectar al resto */}
+        <Image source={require('../assets/DashSF.png')} style={styles.icon} />
 
-      <View style={styles.content}>
-        <View style={styles.banner}>
+        <View style={styles.content}>
           <Text style={styles.bannerText}>
             Descubre Dash, la tienda de juegos más eficiente y rápida del mercado. 
             Encuentra los mejores títulos, ofertas exclusivas y una experiencia de compra sin igual.
           </Text>
         </View>
-      </View>
 
-      <View style={styles.buttonContainer}>
-        <Button title="Ver Juegos" onPress={() => navigation.navigate('MainTabs')} />
-      </View>
-    </ImageBackground>
+        <View style={styles.buttonContainer}>
+          <Button title="Ver Juegos" onPress={() => navigation.navigate('MainTabs')} />
+        </View>
+
+      </ImageBackground>
+    </View>
   );
 };
 
@@ -41,34 +42,26 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  imageContainer: {
-    width: '100%',
-    height: '20%',
-  },
   image: {
+    flex: 1,
     width: '100%',
     height: '100%',
   },
-  separator: {
-    width: '100%',
-    height: 25, // Ajusta el grosor de la barra
-    backgroundColor: '#2C3E50', // Color sólido para la barra
+  gradient: {
+    ...StyleSheet.absoluteFillObject, // Atajo para ocupar toda la pantalla
   },
-  banner: {
-    width: '90%',
-    height: 450,
-    backgroundColor: '#2C3E50',
-    alignSelf: 'center',
-    marginTop: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 45,
+  icon: {
+    position: 'absolute', // Evita que afecte el layout
+    width: 300, // Ajusta el tamaño del icono
+    height: 300,
+    resizeMode: 'contain',
   },
   bannerText: {
     color: 'white',
     fontSize: 20,
     fontWeight: 'bold',
     padding: 20,
+    textAlign: 'center',
   },
   content: {
     flex: 1,
@@ -79,8 +72,6 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     paddingVertical: 20,
-    marginTop: 20,
-    backgroundColor: 'trasnparent',
   },
 });
 
