@@ -72,6 +72,11 @@ const App: React.FC = () => {
           options={{ headerShown: false }}
         />
         <Stack.Screen 
+          name="Profile" 
+          component={ProfileScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen 
           name="GameDetails" 
           component={GameDetailsScreen}
           options={{ title: 'Detalles del juego' }}
