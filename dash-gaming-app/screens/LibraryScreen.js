@@ -1,14 +1,83 @@
 "use client"
 
 import { useState } from "react"
-import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, RefreshControl } from "react-native"
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  Image,
+  TouchableOpacity,
+  RefreshControl,
+  Modal,
+  ScrollView,
+} from "react-native"
 import { StatusBar } from "expo-status-bar"
 import { Ionicons } from "@expo/vector-icons"
 import { useGames } from "../context/GamesContext"
+import { Button } from "../components/ui/Button"
 
 export const LibraryScreen = ({ navigation }) => {
   const { userGames, loading } = useGames()
   const [refreshing, setRefreshing] = useState(false)
+  const [showFilterModal, setShowFilterModal] = useState(false)
+  const [filteredGames, setFilteredGames] = useState([])
+  const [activeFilter, setActiveFilter] = useState("all") // all, recent, mostPlayed, alphabetical
+  const [activeCategory, setActiveCategory] = useState("all") // all, action, adventure, etc.
+
+  // Categorías para filtrar
+  const categories = [
+    { id: "all", name: "Todas" },
+    { id: "action", name: "Acción" },
+    { id: "adventure", name: "Aventura" },
+    { id: "rpg", name: "RPG" },
+    { id: "strategy", name: "Estrategia" },
+    { id: "sports", name: "Deportes" },
+    { id: "indie", name: "Indie" },
+  ]
+
+  // Aplicar filtros a los juegos
+  const applyFilters = () => {
+    let filtered = [...userGames]
+
+    // Filtrar por categoría
+    if (activeCategory !== "all") {
+      filtered = filtered.filter(
+        (game) => game.tags && game.tags.some((tag) => tag.toLowerCase() === activeCategory.toLowerCase()),
+      )
+    }
+
+    // Ordenar según el filtro activo
+    switch (activeFilter) {
+      case "recent":
+        filtered.sort((a, b) => {
+          if (!a.last_played) return 1
+          if (!b.last_played) return -1
+          return new Date(b.last_played) - new Date(a.last_played)
+        })
+        break
+      case "mostPlayed":
+        filtered.sort((a, b) => (b.playtime_minutes || 0) - (a.playtime_minutes || 0))
+        break
+      case "alphabetical":
+        filtered.sort((a, b) => a.title.localeCompare(b.title))
+        break
+      default:
+        // Por defecto, no hacer nada
+        break
+    }
+
+    setFilteredGames(filtered)
+    setShowFilterModal(false)
+  }
+
+  // Restablecer filtros
+  const resetFilters = () => {
+    setActiveFilter("all")
+    setActiveCategory("all")
+    setFilteredGames([])
+    setShowFilterModal(false)
+  }
 
   const onRefresh = () => {
     setRefreshing(true)
@@ -39,6 +108,9 @@ export const LibraryScreen = ({ navigation }) => {
     return `${hours}h ${remainingMinutes}m`
   }
 
+  // Determinar qué juegos mostrar
+  const gamesToDisplay = filteredGames.length > 0 ? filteredGames : userGames
+
   const renderGameItem = ({ item }) => (
     <TouchableOpacity style={styles.gameItem} onPress={() => handleGamePress(item)}>
       <Image source={{ uri: item.image_url }} style={styles.gameImage} />
@@ -61,8 +133,9 @@ export const LibraryScreen = ({ navigation }) => {
 
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Mi Biblioteca</Text>
-        <TouchableOpacity style={styles.filterButton}>
+        <TouchableOpacity style={styles.filterButton} onPress={() => setShowFilterModal(true)}>
           <Ionicons name="filter" size={24} color="#FFFFFF" />
+          {(activeFilter !== "all" || activeCategory !== "all") && <View style={styles.filterBadge} />}
         </TouchableOpacity>
       </View>
 
@@ -70,7 +143,7 @@ export const LibraryScreen = ({ navigation }) => {
         <View style={styles.loadingContainer}>
           <Text style={styles.loadingText}>Cargando tu biblioteca...</Text>
         </View>
-      ) : userGames.length === 0 ? (
+      ) : gamesToDisplay.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Image source={require("../assets/controller.png")} style={styles.emptyIcon} resizeMode="contain" />
           <Text style={styles.emptyTitle}>Tu biblioteca está vacía</Text>
@@ -81,13 +154,102 @@ export const LibraryScreen = ({ navigation }) => {
         </View>
       ) : (
         <FlatList
-          data={userGames}
+          data={gamesToDisplay}
           renderItem={renderGameItem}
           keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={styles.listContent}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#8A2BE2" />}
         />
       )}
+
+      {/* Modal de filtros */}
+      <Modal
+        visible={showFilterModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowFilterModal(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Filtrar biblioteca</Text>
+              <TouchableOpacity onPress={() => setShowFilterModal(false)}>
+                <Ionicons name="close" size={24} color="#FFFFFF" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.modalBody}>
+              <Text style={styles.filterSectionTitle}>Ordenar por</Text>
+              <View style={styles.filterOptions}>
+                <TouchableOpacity
+                  style={[styles.filterOption, activeFilter === "all" && styles.filterOptionActive]}
+                  onPress={() => setActiveFilter("all")}
+                >
+                  <Text style={[styles.filterOptionText, activeFilter === "all" && styles.filterOptionTextActive]}>
+                    Predeterminado
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.filterOption, activeFilter === "recent" && styles.filterOptionActive]}
+                  onPress={() => setActiveFilter("recent")}
+                >
+                  <Text style={[styles.filterOptionText, activeFilter === "recent" && styles.filterOptionTextActive]}>
+                    Jugados recientemente
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.filterOption, activeFilter === "mostPlayed" && styles.filterOptionActive]}
+                  onPress={() => setActiveFilter("mostPlayed")}
+                >
+                  <Text
+                    style={[styles.filterOptionText, activeFilter === "mostPlayed" && styles.filterOptionTextActive]}
+                  >
+                    Más jugados
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.filterOption, activeFilter === "alphabetical" && styles.filterOptionActive]}
+                  onPress={() => setActiveFilter("alphabetical")}
+                >
+                  <Text
+                    style={[styles.filterOptionText, activeFilter === "alphabetical" && styles.filterOptionTextActive]}
+                  >
+                    Alfabético
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              <Text style={styles.filterSectionTitle}>Categorías</Text>
+              <View style={styles.categoriesContainer}>
+                {categories.map((category) => (
+                  <TouchableOpacity
+                    key={category.id}
+                    style={[styles.categoryOption, activeCategory === category.id && styles.categoryOptionActive]}
+                    onPress={() => setActiveCategory(category.id)}
+                  >
+                    <Text
+                      style={[
+                        styles.categoryOptionText,
+                        activeCategory === category.id && styles.categoryOptionTextActive,
+                      ]}
+                    >
+                      {category.name}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <View style={styles.filterActions}>
+                <Button title="Restablecer" variant="outline" onPress={resetFilters} style={styles.resetButton} />
+                <Button title="Aplicar filtros" onPress={applyFilters} style={styles.applyButton} />
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </View>
   )
 }
@@ -113,6 +275,16 @@ const styles = StyleSheet.create({
   },
   filterButton: {
     padding: 8,
+    position: "relative",
+  },
+  filterBadge: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#8A2BE2",
   },
   loadingContainer: {
     flex: 1,
@@ -193,5 +365,94 @@ const styles = StyleSheet.create({
     height: 100,
     marginBottom: 16,
     tintColor: "#8A2BE2",
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    justifyContent: "flex-end",
+  },
+  modalContent: {
+    backgroundColor: "#1A1A1A",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: "80%",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#333",
+  },
+  modalTitle: {
+    color: "#FFFFFF",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  modalBody: {
+    padding: 16,
+  },
+  filterSectionTitle: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 12,
+    marginTop: 8,
+  },
+  filterOptions: {
+    marginBottom: 20,
+  },
+  filterOption: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginBottom: 8,
+    backgroundColor: "#2A2A2A",
+  },
+  filterOptionActive: {
+    backgroundColor: "#8A2BE2",
+  },
+  filterOptionText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+  },
+  filterOptionTextActive: {
+    fontWeight: "bold",
+  },
+  categoriesContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginBottom: 20,
+  },
+  categoryOption: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    marginRight: 8,
+    marginBottom: 8,
+    backgroundColor: "#2A2A2A",
+  },
+  categoryOptionActive: {
+    backgroundColor: "#8A2BE2",
+  },
+  categoryOptionText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+  },
+  categoryOptionTextActive: {
+    fontWeight: "bold",
+  },
+  filterActions: {
+    flexDirection: "row",
+    marginTop: 16,
+    marginBottom: 30,
+  },
+  resetButton: {
+    flex: 1,
+    marginRight: 8,
+  },
+  applyButton: {
+    flex: 2,
   },
 })

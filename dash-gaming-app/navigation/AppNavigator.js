@@ -18,6 +18,7 @@ import { CartScreen } from "../screens/CartScreen"
 import { NotificationsScreen } from "../screens/NotificationsScreen"
 import { PrivacyScreen } from "../screens/PrivacyScreen"
 import { PaymentMethodsScreen } from "../screens/PaymentMethodsScreen"
+import { SearchScreen } from "../screens/SearchScreen"
 
 const Stack = createStackNavigator()
 const Tab = createBottomTabNavigator()
@@ -89,6 +90,7 @@ export const AppNavigator = () => {
             <Stack.Screen name="Notifications" component={NotificationsScreen} />
             <Stack.Screen name="Privacy" component={PrivacyScreen} />
             <Stack.Screen name="PaymentMethods" component={PaymentMethodsScreen} />
+            <Stack.Screen name="Search" component={SearchScreen} />
           </>
         ) : (
           <Stack.Screen name="Auth" component={AuthScreen} />

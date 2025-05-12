@@ -72,7 +72,7 @@ export const HomeScreen = ({ navigation }) => {
           <Text style={styles.headerTitle}>DASH</Text>
         </View>
         <View style={styles.headerIcons}>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate("Search")}>
             <Ionicons name="search" size={24} color="#FFFFFF" style={styles.icon} />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => navigation.navigate("Cart")} style={styles.cartIconContainer}>

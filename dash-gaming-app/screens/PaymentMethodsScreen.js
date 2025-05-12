@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert, Image } from "react-native"
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert, Image, Modal } from "react-native"
 import { StatusBar } from "expo-status-bar"
 import { Ionicons } from "@expo/vector-icons"
 import { Button } from "../components/ui/Button"
@@ -36,6 +36,16 @@ export const PaymentMethodsScreen = ({ navigation }) => {
     cardholderName: "",
   })
   const [errors, setErrors] = useState({})
+
+  // Estado para modales de otros métodos de pago
+  const [showPayPalModal, setShowPayPalModal] = useState(false)
+  const [showWalletModal, setShowWalletModal] = useState(false)
+  const [showGiftCardModal, setShowGiftCardModal] = useState(false)
+
+  // Estado para formularios de otros métodos de pago
+  const [paypalEmail, setPaypalEmail] = useState("")
+  const [walletAmount, setWalletAmount] = useState("")
+  const [giftCardCode, setGiftCardCode] = useState("")
 
   // Función para establecer un método de pago como predeterminado
   const setDefaultPaymentMethod = (id) => {
@@ -107,6 +117,86 @@ export const PaymentMethodsScreen = ({ navigation }) => {
     setErrors({})
 
     Alert.alert("Tarjeta añadida", "Tu tarjeta ha sido añadida correctamente.")
+  }
+
+  // Función para conectar PayPal
+  const handleConnectPayPal = () => {
+    if (!paypalEmail.trim()) {
+      Alert.alert("Error", "Por favor, introduce tu correo electrónico de PayPal")
+      return
+    }
+
+    // Simulación de conexión con PayPal
+    Alert.alert("Conectando con PayPal", "Redirigiendo a PayPal para autorización...", [
+      {
+        text: "Simular éxito",
+        onPress: () => {
+          Alert.alert("Éxito", "Tu cuenta de PayPal ha sido conectada correctamente")
+          setShowPayPalModal(false)
+        },
+      },
+      {
+        text: "Cancelar",
+        style: "cancel",
+      },
+    ])
+  }
+
+  // Función para añadir fondos al monedero
+  const handleAddFunds = () => {
+    if (!walletAmount.trim() || isNaN(Number.parseFloat(walletAmount)) || Number.parseFloat(walletAmount) <= 0) {
+      Alert.alert("Error", "Por favor, introduce una cantidad válida")
+      return
+    }
+
+    // Simulación de añadir fondos
+    Alert.alert("Añadir fondos", `¿Estás seguro de que quieres añadir $${walletAmount} a tu monedero DASH?`, [
+      {
+        text: "Confirmar",
+        onPress: () => {
+          Alert.alert("Éxito", `Se han añadido $${walletAmount} a tu monedero DASH`)
+          setWalletAmount("")
+          setShowWalletModal(false)
+        },
+      },
+      {
+        text: "Cancelar",
+        style: "cancel",
+      },
+    ])
+  }
+
+  // Función para canjear tarjeta de regalo
+  const handleRedeemGiftCard = () => {
+    if (!giftCardCode.trim() || giftCardCode.length < 8) {
+      Alert.alert("Error", "Por favor, introduce un código de tarjeta de regalo válido")
+      return
+    }
+
+    // Simulación de canje de tarjeta de regalo
+    Alert.alert("Canjeando tarjeta", "Verificando código...", [
+      {
+        text: "Simular éxito",
+        onPress: () => {
+          Alert.alert(
+            "Éxito",
+            "Tu tarjeta de regalo ha sido canjeada correctamente. Se han añadido $50.00 a tu cuenta.",
+          )
+          setGiftCardCode("")
+          setShowGiftCardModal(false)
+        },
+      },
+      {
+        text: "Simular error",
+        onPress: () => {
+          Alert.alert("Error", "El código de la tarjeta de regalo no es válido o ya ha sido utilizado")
+        },
+      },
+      {
+        text: "Cancelar",
+        style: "cancel",
+      },
+    ])
   }
 
   // Función para obtener el icono de la tarjeta
@@ -256,7 +346,7 @@ export const PaymentMethodsScreen = ({ navigation }) => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Otros métodos de pago</Text>
 
-          <TouchableOpacity style={styles.paymentOption}>
+          <TouchableOpacity style={styles.paymentOption} onPress={() => setShowPayPalModal(true)}>
             <View style={styles.paymentOptionIcon}>
               <Ionicons name="logo-paypal" size={24} color="#FFFFFF" />
             </View>
@@ -264,7 +354,7 @@ export const PaymentMethodsScreen = ({ navigation }) => {
             <Ionicons name="chevron-forward" size={20} color="#666666" />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.paymentOption}>
+          <TouchableOpacity style={styles.paymentOption} onPress={() => setShowWalletModal(true)}>
             <View style={styles.paymentOptionIcon}>
               <Ionicons name="wallet-outline" size={24} color="#FFFFFF" />
             </View>
@@ -272,7 +362,7 @@ export const PaymentMethodsScreen = ({ navigation }) => {
             <Ionicons name="chevron-forward" size={20} color="#666666" />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.paymentOption}>
+          <TouchableOpacity style={styles.paymentOption} onPress={() => setShowGiftCardModal(true)}>
             <View style={styles.paymentOptionIcon}>
               <Ionicons name="gift-outline" size={24} color="#FFFFFF" />
             </View>
@@ -281,6 +371,130 @@ export const PaymentMethodsScreen = ({ navigation }) => {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      {/* Modal de PayPal */}
+      <Modal
+        visible={showPayPalModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowPayPalModal(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Conectar con PayPal</Text>
+              <TouchableOpacity onPress={() => setShowPayPalModal(false)}>
+                <Ionicons name="close" size={24} color="#FFFFFF" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.modalBody}>
+              <Image source={require("../assets/paypal-logo.png")} style={styles.paypalLogo} resizeMode="contain" />
+              <Text style={styles.modalText}>
+                Conecta tu cuenta de PayPal para realizar pagos de forma rápida y segura.
+              </Text>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>Correo electrónico de PayPal</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="tu.correo@ejemplo.com"
+                  placeholderTextColor="#666"
+                  value={paypalEmail}
+                  onChangeText={setPaypalEmail}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
+              </View>
+
+              <Button title="Conectar con PayPal" onPress={handleConnectPayPal} style={styles.modalButton} />
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Modal de Monedero DASH */}
+      <Modal
+        visible={showWalletModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowWalletModal(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Monedero DASH</Text>
+              <TouchableOpacity onPress={() => setShowWalletModal(false)}>
+                <Ionicons name="close" size={24} color="#FFFFFF" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.modalBody}>
+              <View style={styles.walletBalance}>
+                <Text style={styles.walletBalanceLabel}>Saldo actual</Text>
+                <Text style={styles.walletBalanceAmount}>$0.00</Text>
+              </View>
+
+              <Text style={styles.modalText}>
+                Añade fondos a tu monedero DASH para realizar compras rápidas sin necesidad de introducir datos de pago.
+              </Text>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>Cantidad a añadir ($)</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="10.00"
+                  placeholderTextColor="#666"
+                  value={walletAmount}
+                  onChangeText={setWalletAmount}
+                  keyboardType="numeric"
+                />
+              </View>
+
+              <Button title="Añadir fondos" onPress={handleAddFunds} style={styles.modalButton} />
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Modal de Tarjetas de Regalo */}
+      <Modal
+        visible={showGiftCardModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowGiftCardModal(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Tarjetas de regalo</Text>
+              <TouchableOpacity onPress={() => setShowGiftCardModal(false)}>
+                <Ionicons name="close" size={24} color="#FFFFFF" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.modalBody}>
+              <Image source={require("../assets/gift-card.png")} style={styles.giftCardImage} resizeMode="contain" />
+
+              <Text style={styles.modalText}>Canjea tu tarjeta de regalo DASH para añadir fondos a tu cuenta.</Text>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>Código de la tarjeta</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="XXXX-XXXX-XXXX-XXXX"
+                  placeholderTextColor="#666"
+                  value={giftCardCode}
+                  onChangeText={setGiftCardCode}
+                  autoCapitalize="characters"
+                />
+              </View>
+
+              <Button title="Canjear tarjeta" onPress={handleRedeemGiftCard} style={styles.modalButton} />
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   )
 }
@@ -441,5 +655,70 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 16,
     flex: 1,
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    justifyContent: "flex-end",
+  },
+  modalContent: {
+    backgroundColor: "#1A1A1A",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingBottom: 30,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#333",
+  },
+  modalTitle: {
+    color: "#FFFFFF",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  modalBody: {
+    padding: 16,
+  },
+  modalText: {
+    color: "#CCCCCC",
+    fontSize: 14,
+    marginBottom: 20,
+    lineHeight: 20,
+  },
+  modalButton: {
+    marginTop: 10,
+  },
+  paypalLogo: {
+    width: 120,
+    height: 50,
+    alignSelf: "center",
+    marginBottom: 20,
+  },
+  walletBalance: {
+    backgroundColor: "#2A2A2A",
+    borderRadius: 8,
+    padding: 16,
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  walletBalanceLabel: {
+    color: "#CCCCCC",
+    fontSize: 14,
+    marginBottom: 8,
+  },
+  walletBalanceAmount: {
+    color: "#FFFFFF",
+    fontSize: 28,
+    fontWeight: "bold",
+  },
+  giftCardImage: {
+    width: 200,
+    height: 120,
+    alignSelf: "center",
+    marginBottom: 20,
   },
 })

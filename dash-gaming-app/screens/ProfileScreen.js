@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { View, Text, StyleSheet, Image, TouchableOpacity, Alert } from "react-native"
 import { StatusBar } from "expo-status-bar"
 import { Button } from "../components/ui/Button"
@@ -11,8 +11,20 @@ import { useAuth } from "../context/AuthContext"
 export const ProfileScreen = ({ navigation }) => {
   const { user, signOut, updateProfile } = useAuth()
   const [updating, setUpdating] = useState(false)
-  const [username, setUsername] = useState(user?.username || "")
+  const [username, setUsername] = useState("")
   const [isEditing, setIsEditing] = useState(false)
+
+  // Actualizar el nombre de usuario cuando cambia el usuario
+  useEffect(() => {
+    if (user && user.username) {
+      setUsername(user.username)
+    } else if (user && user.email) {
+      // Si no hay nombre de usuario, usar la parte del correo antes de @
+      setUsername(user.email.split("@")[0])
+    } else {
+      setUsername("Usuario")
+    }
+  }, [user])
 
   const handleUpdateProfile = async () => {
     if (!username.trim()) {
@@ -69,9 +81,9 @@ export const ProfileScreen = ({ navigation }) => {
                 style={styles.usernameInput}
               />
             ) : (
-              <Text style={styles.username}>{user?.username || "Usuario"}</Text>
+              <Text style={styles.username}>{username}</Text>
             )}
-            <Text style={styles.email}>{user?.email}</Text>
+            <Text style={styles.email}>{user?.email || "usuario@ejemplo.com"}</Text>
           </View>
         </View>
 
@@ -82,7 +94,14 @@ export const ProfileScreen = ({ navigation }) => {
               title="Cancelar"
               onPress={() => {
                 setIsEditing(false)
-                setUsername(user?.username || "")
+                // Restaurar el nombre de usuario original
+                if (user && user.username) {
+                  setUsername(user.username)
+                } else if (user && user.email) {
+                  setUsername(user.email.split("@")[0])
+                } else {
+                  setUsername("Usuario")
+                }
               }}
               variant="outline"
               style={styles.cancelButton}
