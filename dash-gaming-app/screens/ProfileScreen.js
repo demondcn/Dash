@@ -115,19 +115,19 @@ export const ProfileScreen = ({ navigation }) => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Configuración</Text>
 
-          <TouchableOpacity style={styles.settingItem}>
+          <TouchableOpacity style={styles.settingItem} onPress={() => navigation.navigate("Notifications")}>
             <Ionicons name="notifications-outline" size={24} color="#FFFFFF" style={styles.settingIcon} />
             <Text style={styles.settingText}>Notificaciones</Text>
             <Ionicons name="chevron-forward" size={24} color="#666666" />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.settingItem}>
+          <TouchableOpacity style={styles.settingItem} onPress={() => navigation.navigate("Privacy")}>
             <Ionicons name="lock-closed-outline" size={24} color="#FFFFFF" style={styles.settingIcon} />
             <Text style={styles.settingText}>Privacidad</Text>
             <Ionicons name="chevron-forward" size={24} color="#666666" />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.settingItem}>
+          <TouchableOpacity style={styles.settingItem} onPress={() => navigation.navigate("PaymentMethods")}>
             <Ionicons name="card-outline" size={24} color="#FFFFFF" style={styles.settingIcon} />
             <Text style={styles.settingText}>Métodos de pago</Text>
             <Ionicons name="chevron-forward" size={24} color="#666666" />

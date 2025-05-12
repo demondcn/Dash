@@ -9,7 +9,7 @@ import { Ionicons } from "@expo/vector-icons"
 import { useGames } from "../context/GamesContext"
 
 export const HomeScreen = ({ navigation }) => {
-  const { games, loading } = useGames()
+  const { games, cartItems, loading } = useGames()
   const [refreshing, setRefreshing] = useState(false)
   const [featuredGame, setFeaturedGame] = useState(null)
   const [newReleases, setNewReleases] = useState([])
@@ -75,8 +75,13 @@ export const HomeScreen = ({ navigation }) => {
           <TouchableOpacity>
             <Ionicons name="search" size={24} color="#FFFFFF" style={styles.icon} />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate("Cart")}>
+          <TouchableOpacity onPress={() => navigation.navigate("Cart")} style={styles.cartIconContainer}>
             <Ionicons name="cart-outline" size={24} color="#FFFFFF" style={styles.icon} />
+            {cartItems.length > 0 && (
+              <View style={styles.cartBadge}>
+                <Text style={styles.cartBadgeText}>{cartItems.length}</Text>
+              </View>
+            )}
           </TouchableOpacity>
         </View>
       </View>
@@ -158,6 +163,25 @@ const styles = StyleSheet.create({
   },
   icon: {
     marginLeft: 20,
+  },
+  cartIconContainer: {
+    position: "relative",
+  },
+  cartBadge: {
+    position: "absolute",
+    right: -6,
+    top: -6,
+    backgroundColor: "#FF4D4F",
+    borderRadius: 10,
+    width: 20,
+    height: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  cartBadgeText: {
+    color: "#FFFFFF",
+    fontSize: 12,
+    fontWeight: "bold",
   },
   content: {
     flex: 1,

@@ -14,6 +14,10 @@ import { GameDetailsScreen } from "../screens/GameDetailsScreen"
 import { LibraryScreen } from "../screens/LibraryScreen"
 import { ProfileScreen } from "../screens/ProfileScreen"
 import { SplashScreen } from "../screens/SplashScreen"
+import { CartScreen } from "../screens/CartScreen"
+import { NotificationsScreen } from "../screens/NotificationsScreen"
+import { PrivacyScreen } from "../screens/PrivacyScreen"
+import { PaymentMethodsScreen } from "../screens/PaymentMethodsScreen"
 
 const Stack = createStackNavigator()
 const Tab = createBottomTabNavigator()
@@ -81,6 +85,10 @@ export const AppNavigator = () => {
           <>
             <Stack.Screen name="Main" component={MainTabs} />
             <Stack.Screen name="GameDetails" component={GameDetailsScreen} />
+            <Stack.Screen name="Cart" component={CartScreen} />
+            <Stack.Screen name="Notifications" component={NotificationsScreen} />
+            <Stack.Screen name="Privacy" component={PrivacyScreen} />
+            <Stack.Screen name="PaymentMethods" component={PaymentMethodsScreen} />
           </>
         ) : (
           <Stack.Screen name="Auth" component={AuthScreen} />

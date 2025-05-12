@@ -18,13 +18,18 @@
     "expo": "^53.0.0",
     "expo-linear-gradient": "~14.1.4",
     "expo-status-bar": "~2.2.3",
+    "expo-three": "^8.0.0",
     "react": "19.0.0",
     "react-native": "0.79.2",
     "react-native-dotenv": "^3.4.11",
     "react-native-gesture-handler": "~2.24.0",
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.10.0",
-    "react-native-url-polyfill": "^2.0.0"
+    "react-native-url-polyfill": "^2.0.0",
+    "three": "^0.166.1",
+    "react-dom": "19.0.0",
+    "react-native-web": "^0.20.0",
+    "@expo/metro-runtime": "~5.0.4"
   },
   "devDependencies": {
     "@babel/core": "^7.26.0"

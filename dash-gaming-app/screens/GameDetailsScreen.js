@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity } from "react-native"
+import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, Alert } from "react-native"
 import { StatusBar } from "expo-status-bar"
 import { Ionicons } from "@expo/vector-icons"
 import { Button } from "../components/ui/Button"
@@ -9,33 +9,65 @@ import { useGames } from "../context/GamesContext"
 
 export const GameDetailsScreen = ({ route, navigation }) => {
   const { game } = route.params
-  const { addToCart, purchaseGame } = useGames()
+  const { addToCart, purchaseGame, cartItems, userGames } = useGames()
   const [loading, setLoading] = useState(false)
-  const [inCart, setInCart] = useState(false)
-  const [owned, setOwned] = useState(false)
 
   const discountedPrice = game.discount_percent > 0 ? game.price * (1 - game.discount_percent / 100) : null
 
+  // Verificar si el juego ya está en el carrito o en la biblioteca
+  const isInCart = cartItems.some((item) => item.id.toString() === game.id.toString())
+  const isOwned = userGames.some((item) => item.id.toString() === game.id.toString())
+
   const handleAddToCart = async () => {
     setLoading(true)
-    setTimeout(() => {
-      const success = addToCart(game.id)
+    try {
+      const { success, error } = await addToCart(game.id)
+
       if (success) {
-        setInCart(true)
+        Alert.alert("Añadido al carrito", "El juego ha sido añadido a tu carrito.", [
+          {
+            text: "Seguir comprando",
+            style: "cancel",
+          },
+          {
+            text: "Ver carrito",
+            onPress: () => navigation.navigate("Cart"),
+          },
+        ])
+      } else if (error) {
+        Alert.alert("Error", error)
       }
+    } catch (error) {
+      Alert.alert("Error", "No se pudo añadir el juego al carrito.")
+    } finally {
       setLoading(false)
-    }, 500)
+    }
   }
 
   const handleBuyNow = async () => {
     setLoading(true)
-    setTimeout(() => {
-      const success = purchaseGame(game.id)
+    try {
+      const { success, error } = await purchaseGame(game.id)
+
       if (success) {
-        setOwned(true)
+        Alert.alert("¡Compra exitosa!", "El juego ha sido añadido a tu biblioteca.", [
+          {
+            text: "Ver biblioteca",
+            onPress: () => navigation.navigate("Library"),
+          },
+          {
+            text: "Seguir comprando",
+            style: "cancel",
+          },
+        ])
+      } else if (error) {
+        Alert.alert("Error", error)
       }
+    } catch (error) {
+      Alert.alert("Error", "No se pudo completar la compra.")
+    } finally {
       setLoading(false)
-    }, 1000)
+    }
   }
 
   return (
@@ -51,6 +83,11 @@ export const GameDetailsScreen = ({ route, navigation }) => {
         </Text>
         <TouchableOpacity style={styles.cartButton} onPress={() => navigation.navigate("Cart")}>
           <Ionicons name="cart-outline" size={24} color="#FFFFFF" />
+          {cartItems.length > 0 && (
+            <View style={styles.cartBadge}>
+              <Text style={styles.cartBadgeText}>{cartItems.length}</Text>
+            </View>
+          )}
         </TouchableOpacity>
       </View>
 
@@ -96,13 +133,13 @@ export const GameDetailsScreen = ({ route, navigation }) => {
         </View>
 
         <View style={styles.buttonsContainer}>
-          {owned ? (
+          {isOwned ? (
             <Button title="Jugar" onPress={() => {}} style={styles.playButton} />
           ) : (
             <>
               <Button title="Comprar ahora" onPress={handleBuyNow} loading={loading} style={styles.buyButton} />
 
-              {!inCart ? (
+              {!isInCart ? (
                 <Button
                   title="Añadir al carrito"
                   onPress={handleAddToCart}
@@ -111,7 +148,12 @@ export const GameDetailsScreen = ({ route, navigation }) => {
                   style={styles.cartButton}
                 />
               ) : (
-                <Button title="En el carrito" variant="secondary" disabled={true} style={styles.cartButton} />
+                <Button
+                  title="Ver carrito"
+                  variant="secondary"
+                  onPress={() => navigation.navigate("Cart")}
+                  style={styles.cartButton}
+                />
               )}
             </>
           )}
@@ -147,6 +189,23 @@ const styles = StyleSheet.create({
   },
   cartButton: {
     padding: 8,
+    position: "relative",
+  },
+  cartBadge: {
+    position: "absolute",
+    right: 0,
+    top: 0,
+    backgroundColor: "#FF4D4F",
+    borderRadius: 10,
+    width: 20,
+    height: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  cartBadgeText: {
+    color: "#FFFFFF",
+    fontSize: 12,
+    fontWeight: "bold",
   },
   content: {
     flex: 1,
